@@ -14,7 +14,7 @@
 {% for item in game_list %}
 
 <div>
-    <h3>{{ item.date }}'({{item.player1}} ,  {{item.player1}}, {{item.player2}} , {{item.player3}}, {{item.player4}} )'</h3>
+    <h3>{{ item.date }}'({{item.player1}}, {{item.player2}} , {{item.player3}}, {{item.player4}} )'</h3>
     <p><a href="{% url 'game_detail' pk=item.id %}">詳細</a></p>
 </div>
 
