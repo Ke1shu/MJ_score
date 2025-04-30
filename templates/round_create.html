@@ -18,5 +18,14 @@
     </table>
     <input type="submit" value="記録">
 </form>
+
+{% if formset.non_form_errors %}
+  <ul class="errorlist">
+    {% for error in formset.non_form_errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
 <a href="{% url 'game_detail' pk=game.id %}">← 対局詳細に戻る</a>
 {% endblock %}

@@ -5,7 +5,7 @@ from .models import *
 from django.views.generic import CreateView,DeleteView,UpdateView
 from django.urls import reverse_lazy
 
-from .forms import GameCreateForm
+from .forms import *
 
 from django.db.models import Sum
 from django.forms import modelformset_factory,formset_factory
@@ -103,16 +103,17 @@ class ScoreForm(forms.Form):
     player = forms.CharField(widget=forms.HiddenInput)
     point = forms.IntegerField(label='スコア')
 
-ScoreFormSet = modelformset_factory(
+    ScoreFormSet = modelformset_factory(
     ScoreModel,
     fields=('raw_score',),  # 素点のみ表示
-    extra=0
-)
+    extra=0,
+    formset=ScoreBaseFormSet
+    )
 
 def round_create_view(request, pk):
     game = get_object_or_404(GameModel, pk=pk)
     players = [game.player1, game.player2, game.player3, game.player4]
-    ScoreFormSet = modelformset_factory(ScoreModel, fields=('raw_score',), extra=4)
+    ScoreFormSet = modelformset_factory(ScoreModel, fields=('raw_score',), extra=4,formset=ScoreBaseFormSet)
 
     if request.method == 'POST':
         round_number = RoundModel.objects.filter(game=game).count() + 1
@@ -158,7 +159,7 @@ def round_edit_view(request, round_pk):
     round_obj = get_object_or_404(RoundModel, id=round_pk)
     game = round_obj.game
 
-    ScoreFormSet = modelformset_factory(ScoreModel, fields=('raw_score',), extra=0)
+    ScoreFormSet = modelformset_factory(ScoreModel, fields=('raw_score',), extra=0,formset=ScoreBaseFormSet)
     score_qs = ScoreModel.objects.filter(round=round_obj)
 
     # 初期データがなければ4人分スコアを作成
