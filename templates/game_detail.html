@@ -1,0 +1,41 @@
+{%extends 'base.html'%}
+
+{% block content %}
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>プレイヤー名</th>
+            {% for player in players %}
+                <th>{{ player.name }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in score_table %}
+            <tr>
+                {% if row.round %}
+                    <td>
+                        第{{ row.round.number }}回戦
+                        <a href="{% url 'round_edit' round_pk=row.round.id %}">✏️編集</a>
+                    </td>
+                    {% for score in row.scores %}
+                        <td>{{ score }}</td>
+                    {% endfor %}
+                {% else %}
+                    <td><strong>{{ row.label }}</strong></td>
+                    {% for total in row.scores %}
+                        <td><strong>{{ total }}</strong></td>
+                    {% endfor %}
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p> <a href="{% url 'round_create' game.pk %}">ラウンドの作成</a> </p>
+
+<a href="{% url 'game_list' %}">← 対局一覧に戻る</a>
+
+{%endblock content%}
+

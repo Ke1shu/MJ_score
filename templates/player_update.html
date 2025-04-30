@@ -1,0 +1,8 @@
+{%extends 'base.html'%}
+
+{%block content%}
+<form method="POST"> {% csrf_token %}
+    <p>プレイヤー名 : <input type="text" name="player_name" value="{{object.player_name }}"></p>
+    <input type="submit" value="更新">
+</form>
+{%endblock content%}

@@ -1,0 +1,11 @@
+{%extends 'base.html'%}
+
+{%block content%}
+<form method="POST"> {% csrf_token %}
+    <p>プレイヤー名 : <input type="text" name="name"></p>
+    <input type="submit" value="作成">
+</form>
+
+
+<p> <a href="{% url 'player_list'%}"> キャンセル </a> </p>
+{%endblock content%}

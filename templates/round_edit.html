@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <table>
+        <thead>
+            <tr>
+                <th>プレイヤー</th>
+                <th>スコア</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for form in formset %}
+                <tr>
+                    {{ form.id }}  {# ← ここ重要！ #}
+                    <td>{{ form.instance.player.name }}</td>
+                    <td>{{ form.point }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <input type="submit" value="更新">
+</form>
+
+
+<a href="{% url 'game_detail' round.game.id %}">← 一覧に戻る</a>
+{% endblock %}

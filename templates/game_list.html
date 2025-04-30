@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<p><a href="{% url 'home' %}">Home</a></p>
+
+<p><a href="{% url 'game_list' %}">対局リスト</a></p>
+
+
+<p>
+    <a href="{% url 'game_create' %}">対局の作成</a>
+</p>
+
+{% for item in game_list %}
+
+<div>
+    <h3>{{ item.date }}'({{item.player1}} ,  {{item.player1}}, {{item.player2}} , {{item.player3}}, {{item.player4}} )'</h3>
+    <p><a href="{% url 'game_detail' pk=item.id %}">詳細</a></p>
+</div>
+
+{% endfor %}
+
+{% endblock content %}

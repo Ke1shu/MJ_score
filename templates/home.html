@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{%  block header %}
+<tittle>ホーム</tittle>
+{% endblock header %}
+
+{% block content %}
+
+<h1>ホームだよ</h1>
+
+<p>
+    <a href="{% url 'player_list' %}">プレイヤーリスト</a>
+</p>
+<p>
+    <a href="{% url 'game_list' %}">対局リスト</a>
+</p>
+
+
+{% endblock content %}

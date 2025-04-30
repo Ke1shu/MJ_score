@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>対局作成</h2>
+<form method="POST">
+    {% csrf_token %}
+    <p>{{ form.player1.label }}: {{ form.player1 }}</p>
+    <p>{{ form.player2.label }}: {{ form.player2 }}</p>
+    <p>{{ form.player3.label }}: {{ form.player3 }}</p>
+    <p>{{ form.player4.label }}: {{ form.player4 }}</p>
+    <input type="submit" value="作成">
+</form>
+
+
+<p> <a href="{% url 'game_list'%}">キャンセル</a> </p>
+{% endblock %}
