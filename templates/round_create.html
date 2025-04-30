@@ -1,26 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
-
-<h2>{{ game.date }} - 新しいラウンドを作成</h2>
-
+<h2>{{ game.date }} - 第{{ round.number }}回戦（素点入力）</h2>
 <form method="POST">
     {% csrf_token %}
     {{ formset.management_form }}
     <table>
-        <thead><tr><th>プレイヤー</th><th>スコア</th></tr></thead>
+        <thead><tr><th>プレイヤー</th><th>素点</th></tr></thead>
         <tbody>
             {% for form in formset %}
+                {{ form.id }}
                 <tr>
-                    <td>{{ form.cleaned_data.player|default:form.initial.player }}</td>
-                    <td>{{ form.point }}</td>
-                    {{ form.player }}  {# hidden input #}
+                    <td>{{ form.instance.player.name }}</td>
+                    <td>{{ form.raw_score }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
-    <input type="submit" value="登録">
+    <input type="submit" value="記録">
 </form>
-
-<a href="{% url 'game_detail' pk=game.id %}">← キャンセル</a>
-
+<a href="{% url 'game_detail' pk=game.id %}">← 対局詳細に戻る</a>
 {% endblock %}

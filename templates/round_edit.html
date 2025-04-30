@@ -1,28 +1,36 @@
 {% extends 'base.html' %}
 {% block content %}
+
+<h2>{{ round.game.date }} - 第{{ round.number }}回戦（スコア編集）</h2>
+
 <form method="POST">
     {% csrf_token %}
     {{ formset.management_form }}
-    <table>
+    <table border="1">
         <thead>
             <tr>
                 <th>プレイヤー</th>
-                <th>スコア</th>
+                <th>素点</th>
+                <th>ポイント</th>
             </tr>
         </thead>
         <tbody>
             {% for form in formset %}
+                {{ form.id }}  {# ← 重要！ hidden input #}
                 <tr>
-                    {{ form.id }}  {# ← ここ重要！ #}
                     <td>{{ form.instance.player.name }}</td>
-                    <td>{{ form.point }}</td>
+                    <td>{{ form.raw_score }}</td>
+                    <td>
+                        {{ form.instance.point|floatformat:1 }} pt
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+
     <input type="submit" value="更新">
 </form>
 
+<a href="{% url 'game_detail' pk=round.game.id %}">← 対局詳細に戻る</a>
 
-<a href="{% url 'game_detail' round.game.id %}">← 一覧に戻る</a>
 {% endblock %}

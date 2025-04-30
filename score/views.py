@@ -10,6 +10,8 @@ from .forms import GameCreateForm
 from django.db.models import Sum
 from django.forms import modelformset_factory,formset_factory
 from django import forms
+from .utils import calculate_points
+
 
 # Create your views here.
 
@@ -101,44 +103,62 @@ class ScoreForm(forms.Form):
     player = forms.CharField(widget=forms.HiddenInput)
     point = forms.IntegerField(label='スコア')
 
+ScoreFormSet = modelformset_factory(
+    ScoreModel,
+    fields=('raw_score',),  # 素点のみ表示
+    extra=0
+)
+
 def round_create_view(request, pk):
     game = get_object_or_404(GameModel, pk=pk)
     players = [game.player1, game.player2, game.player3, game.player4]
-
-    ScoreFormSet = formset_factory(ScoreForm, extra=0)
+    ScoreFormSet = modelformset_factory(ScoreModel, fields=('raw_score',), extra=4)
 
     if request.method == 'POST':
+        round_number = RoundModel.objects.filter(game=game).count() + 1
+        round_obj = RoundModel.objects.create(game=game, number=round_number)
+
+        # POSTデータに基づき4人分のスコアを作成
         formset = ScoreFormSet(request.POST)
         if formset.is_valid():
-            # ラウンドを作成
-            latest_round = RoundModel.objects.filter(game=game).order_by('-number').first()
-            next_number = latest_round.number + 1 if latest_round else 1
-            round_obj = RoundModel.objects.create(game=game, number=next_number)
+            instances = formset.save(commit=False)
+            raw_scores = {}
+            for i, instance in enumerate(instances):
+                instance.round = round_obj
+                instance.player = players[i]
+                instance.save()
+                raw_scores[instance.player.id] = instance.raw_score
 
-            # スコアを保存
-            for form in formset:
-                ScoreModel.objects.create(
-                    round=round_obj,
-                    player=PlayerModel.objects.get(name=form.cleaned_data['player']),
-                    point=form.cleaned_data['point']
-                )
+            # ポイント計算
+            setting = game.setting
+            tie_rule = round_obj.get_tie_rule()
+            points = calculate_points(raw_scores, setting, tie_rule)
+
+            for score in ScoreModel.objects.filter(round=round_obj):
+                score.point = points[score.player.id]
+                score.save()
 
             return redirect('game_detail', pk=game.pk)
+        else:
+            round_obj.delete()
+
     else:
-        initial_data = [{'player': player.name, 'point': 0} for player in players]
-        formset = ScoreFormSet(initial=initial_data)
+        # GET時は空のフォームのみ表示（DBに何も書かない）
+        formset = ScoreFormSet(queryset=ScoreModel.objects.none())
 
     return render(request, 'round_create.html', {
         'formset': formset,
+        'round': None,
         'game': game,
     })
+
 
 
 def round_edit_view(request, round_pk):
     round_obj = get_object_or_404(RoundModel, id=round_pk)
     game = round_obj.game
 
-    ScoreFormSet = modelformset_factory(ScoreModel, fields=('point',), extra=0)
+    ScoreFormSet = modelformset_factory(ScoreModel, fields=('raw_score',), extra=0)
     score_qs = ScoreModel.objects.filter(round=round_obj)
 
     # 初期データがなければ4人分スコアを作成
