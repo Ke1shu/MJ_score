@@ -159,34 +159,44 @@ def round_edit_view(request, round_pk):
     round_obj = get_object_or_404(RoundModel, id=round_pk)
     game = round_obj.game
 
-    ScoreFormSet = modelformset_factory(ScoreModel, fields=('raw_score',), extra=0,formset=ScoreBaseFormSet)
-    score_qs = ScoreModel.objects.filter(round=round_obj)
+    ScoreFormSet = modelformset_factory(
+        ScoreModel,
+        fields=('raw_score',),
+        extra=0,
+        formset=ScoreBaseFormSet
+    )
 
-    # 初期データがなければ4人分スコアを作成
-    if not score_qs.exists():
-        for player in [game.player1, game.player2, game.player3, game.player4]:
-            ScoreModel.objects.create(round=round_obj, player=player, point=0)
-        score_qs = ScoreModel.objects.filter(round=round_obj)
+    score_queryset = ScoreModel.objects.filter(round=round_obj)
 
     if request.method == 'POST':
-        formset = ScoreFormSet(request.POST, queryset=score_qs)
+        formset = ScoreFormSet(request.POST, queryset=score_queryset)
         if formset.is_valid():
-            # フォームの保存処理
             instances = formset.save(commit=False)
-            for instance in instances:
-                instance.round = round_obj  # 明示的に関連づけ
-                instance.save()
 
-            # 不要な削除が起きないよう明示的に commit=True を指定
-            formset.save_m2m()
+            # raw_scoreを収集（Noneを除外）
+            raw_scores = {}
+            for form in formset:
+                if form.cleaned_data and form.cleaned_data.get('raw_score') is not None:
+                    player_id = form.instance.player.id
+                    raw_scores[player_id] = form.cleaned_data['raw_score']
 
-            # ✅ 成功時は必ずリダイレクト
-            return redirect('game_detail', pk=game.pk)
-        else:
-            # フォームが無効でもログなど出力しておくと良い（開発時のみ）
-            print("フォームが無効です:", formset.errors)
+            # 安全チェック：プレイヤー数が4人未満ならエラー
+            if len(raw_scores) != 4:
+                formset._non_form_errors = ['4人全員分の素点を正しく入力してください。']
+            else:
+                # 設定取得とポイント再計算
+                setting = game.setting
+                tie_rule = round_obj.get_tie_rule()
+                points = calculate_points(raw_scores, setting, tie_rule)
+
+                # ポイントを設定して保存
+                for instance in instances:
+                    instance.point = points[instance.player.id]
+                    instance.save()
+
+                return redirect('game_detail', pk=game.pk)
     else:
-        formset = ScoreFormSet(queryset=score_qs)
+        formset = ScoreFormSet(queryset=score_queryset)
 
     return render(request, 'round_edit.html', {
         'formset': formset,
