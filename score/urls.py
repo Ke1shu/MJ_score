@@ -15,5 +15,10 @@ urlpatterns = [
     path('game_detail/<uuid:pk>', game_detailfunc, name='game_detail'),
     path('game_detail/<uuid:pk>/round_create/', round_create_view, name='round_create'),
     path('game_detail/round_edit/<int:round_pk>/', round_edit_view, name='round_edit'),
+    path('settings/', setting_list, name='setting_list'),
+    path('settings/create/', setting_create, name='setting_create'),
+    path('settings/<int:pk>/', setting_detail, name='setting_detail'),
+    path('settings/<int:pk>/update/', setting_update, name='setting_update'),
+    path('settings/<int:pk>/delete/', setting_delete, name='setting_delete'),
     
 ]

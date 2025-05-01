@@ -83,46 +83,29 @@ class ScoreModel(models.Model):
 
 
 class GameSettingModel(models.Model):
-    # ウマ設定（2〜4位）
-    uma_2 = models.IntegerField(default=10, verbose_name="2位のウマ")
-    uma_3 = models.IntegerField(default=-10, verbose_name="3位のウマ")
-    uma_4 = models.IntegerField(default=-30, verbose_name="4位のウマ")
-
-    # 返し点（基本点）
-    return_score = models.IntegerField(default=30000, verbose_name="返し点")
-
-    # 丸め方法（100の位で）
-    rounding_rule = models.CharField(
-        max_length=10,
-        choices=[
-            ('round', '四捨五入'),
-            ('floor', '切り捨て（5捨6入）'),
-            ('ceil', '切り上げ')
-        ],
-        default='floor',
-        verbose_name="丸め処理方法"
-    )
-
-    # 同着処理方法（ウマの分配）
+    return_score = models.IntegerField(default=30000)
+    uma_2 = models.IntegerField(default=10)
+    uma_3 = models.IntegerField(default=-10)
+    uma_4 = models.IntegerField(default=-30)
     tie_rule = models.CharField(
-        max_length=15,
-        choices=[
-            ('split', '均等分配（同着者でウマを割る）'),
-            ('prefer_early', '順位順（早く登録された人に全部与える）')
-        ],
-        default='split',
-        verbose_name="同着ウマ処理方法"
+        max_length=20,
+        choices=[('split', 'ウマを分配する'), ('prefer_early', '上位優先')],
+        default='split'
     )
 
-    def get_uma_top(self):
-        """
-        1位のウマは、2〜4位の合計と逆符号で自動調整する
-        """
-        return -(self.uma_2 + self.uma_3 + self.uma_4)
+    def save(self, *args, **kwargs):
+        self.uma_3 = -self.uma_2  # 2着の逆に自動設定
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"設定#{self.id} ウマ: {self.get_uma_top()}/{self.uma_2}/{self.uma_3}/{self.uma_4}"
+        return f"設定#{self.id} ウマ: {self.uma_2} - {abs(self.uma_4)}"
 
-
-
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['return_score', 'uma_2', 'uma_3', 'uma_4', 'tie_rule'],
+                name='unique_game_setting'
+            )
+        ]
     

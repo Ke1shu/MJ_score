@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>設定一覧</h2>
+
+<a href="{% url 'setting_create' %}">＋ 新しい設定を作成</a>
+
+<ul>
+  {% for setting in settings %}
+    <li>
+      <a href="{% url 'setting_detail' setting.pk %}">{{ setting}}</a>
+    </li>
+  {% empty %}
+    <li>設定がまだありません。</li>
+  {% endfor %}
+</ul>
+
+<a href="{% url 'game_list' %}">← 対局一覧へ戻る</a>
+{% endblock %}

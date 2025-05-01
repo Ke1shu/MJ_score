@@ -1,7 +1,8 @@
 from django import forms
-from .models import GameModel, PlayerModel
+from .models import *
 
 from django.forms import BaseModelFormSet, ValidationError
+
 
 class GameCreateForm(forms.ModelForm):
     player1 = forms.ModelChoiceField(queryset=PlayerModel.objects.all(), label="プレイヤー1")
@@ -42,3 +43,8 @@ class ScoreBaseFormSet(BaseModelFormSet):
             raise ValidationError(
                 f'素点の合計が {total} 点になっています。合計はちょうど 100000 点である必要があります。'
             )
+
+class GameSettingForm(forms.ModelForm):
+    class Meta:
+        model = GameSettingModel
+        exclude = ['uma_3']

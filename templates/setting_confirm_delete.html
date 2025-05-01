@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>設定の削除確認</h2>
+
+<p>「{{ setting.name }}」を本当に削除しますか？</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">削除する</button>
+  <a href="{% url 'setting_detail' setting.pk %}">キャンセル</a>
+</form>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>設定詳細</h2>
+
+<p><strong>名前：</strong> {{ setting.name }}</p>
+<p><strong>返り点：</strong> {{ setting.return_score }}</p>
+<p><strong>ウマ（2位）：</strong> {{ setting.uma_2 }}</p>
+<p><strong>ウマ（3位）：</strong> {{ setting.uma_3 }}</p>
+<p><strong>ウマ（4位）：</strong> {{ setting.uma_4 }}</p>
+<p><strong>同着ルール：</strong> 
+  {% if setting.tie_rule == 'split' %} ウマを分配する
+  {% else %} 上位優先
+  {% endif %}
+</p>
+
+<p>
+  <a href="{% url 'setting_update' setting.pk %}">編集</a> |
+  <a href="{% url 'setting_delete' setting.pk %}">削除</a> |
+  <a href="{% url 'setting_list' %}">戻る</a>
+</p>
+{% endblock %}

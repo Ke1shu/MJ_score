@@ -192,3 +192,41 @@ def round_edit_view(request, round_pk):
         'formset': formset,
         'round': round_obj,
     })
+
+
+
+def setting_list(request):
+    settings = GameSettingModel.objects.all()
+    return render(request, 'setting_list.html', {'settings': settings})
+
+def setting_detail(request, pk):
+    setting = get_object_or_404(GameSettingModel, pk=pk)
+    return render(request, 'setting_detail.html', {'setting': setting})
+
+def setting_create(request):
+    if request.method == 'POST':
+        form = GameSettingForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('setting_list')
+    else:
+        form = GameSettingForm()
+    return render(request, 'setting_form.html', {'form': form})
+
+def setting_update(request, pk):
+    setting = get_object_or_404(GameSettingModel, pk=pk)
+    if request.method == 'POST':
+        form = GameSettingForm(request.POST, instance=setting)
+        if form.is_valid():
+            form.save()
+            return redirect('setting_detail', pk=pk)
+    else:
+        form = GameSettingForm(instance=setting)
+    return render(request, 'setting_form.html', {'form': form})
+
+def setting_delete(request, pk):
+    setting = get_object_or_404(GameSettingModel, pk=pk)
+    if request.method == 'POST':
+        setting.delete()
+        return redirect('setting_list')
+    return render(request, 'setting_confirm_delete.html', {'setting': setting})
